@@ -307,4 +307,162 @@
     </div>
   </div>
 </body>
+
+    <script>
+    // Password data storage
+    let passwords = [
+      {
+        id: 1,
+        website: 'github.com',
+        description: 'Development Account',
+        username: 'student.dev',
+        password: 'Gh!tHub@2025$ecure',
+        strength: 'Strong',
+        lastModified: '2 mins ago'
+      },
+      {
+        id: 2,
+        website: 'google.com',
+        description: 'Primary Email',
+        username: 'you@example.com',
+        password: 'G00gl3!Str0ng#Pass',
+        strength: 'Strong',
+        lastModified: '1 hour ago'
+        },
+      {
+        id: 3,
+        website: 'bank-portal.com',
+        description: 'Savings Account',
+        username: '••••••••',
+        password: 'Bank@Secure2025!',
+        strength: 'Medium',
+        lastModified: 'Yesterday'
+      },
+      {
+        id: 4,
+        website: 'campus-portal',
+        description: 'University Login',
+        username: 'student@klu',
+        password: 'weak123',
+        strength: 'Weak',
+        lastModified: '3 days ago'
+      },
+      {
+        id: 5,
+        website: 'dev-environment',
+        description: 'Local Test Credentials',
+        username: 'local-admin',
+        password: 'DevEnv@Admin#2025',
+        strength: 'Strong',
+        lastModified: 'Just now'
+      },
+      {
+        id: 6,
+        website: 'api-service',
+        description: 'Integration Token',
+        username: 'token-***',
+        password: 'API!T0ken@Secure#99',
+        strength: 'Strong',
+        lastModified: '4 days ago'
+      }
+    ];
+
+    // Update statistics
+    function updateStats() {
+      document.querySelector('.stat-card:nth-child(1) h3').textContent = passwords.length;
+      const strongCount = passwords.filter(p => p.strength === 'Strong').length;
+      document.querySelector('.stat-card:nth-child(2) h3').textContent = strongCount;
+    }
+
+    // Toggle password visibility
+    function togglePassword(button, password) {
+      const td = button.closest('tr').querySelector('.password-hidden');
+      if (td.textContent === '••••••••••') {
+        td.textContent = password;
+        button.textContent = '🙈 Hide';
+      } else {
+        td.textContent = '••••••••••';
+        button.textContent = '👁️ View';
+      }
+    }
+
+    // Copy password to clipboard
+    function copyPassword(password) {
+      navigator.clipboard.writeText(password).then(() => {
+        alert('Password copied to clipboard!');
+      });
+    }
+
+    // Render password table
+    function renderPasswords() {
+      const tbody = document.querySelector('.password-table tbody');
+      tbody.innerHTML = passwords.map(p => `
+        <tr>
+          <td><strong>${p.website}</strong><br><small>${p.description}</small></td>
+          <td>${p.username}</td>
+          <td class="password-hidden">••••••••••</td>
+          <td><span class="badge badge-${p.strength.toLowerCase()}">${p.strength}</span></td>
+          <td>${p.lastModified}</td>
+          <td>
+            <button class="action-btn" onclick="togglePassword(this, '${p.password}')">👁️ View</button>
+            <button class="action-btn" onclick="copyPassword('${p.password}')">📋 Copy</button>
+            <button class="action-btn" onclick="deletePassword(${p.id})" style="background: #ef4444;">🗑️ Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Delete password
+    function deletePassword(id) {
+      if (confirm('Are you sure you want to delete this password?')) {
+        passwords = passwords.filter(p => p.id !== id);
+        renderPasswords();
+        updateStats();
+      }
+    }
+
+    // Add new password
+    function addPassword() {
+      const website = prompt('Enter website/service:');
+      if (!website) return;
+      
+      const username = prompt('Enter username:');
+      const password = prompt('Enter password:');
+      const description = prompt('Enter description:');
+      
+      if (website && username && password) {
+        const newPassword = {
+          id: Math.max(...passwords.map(p => p.id)) + 1,
+          website,
+          description: description || 'No description',
+          username,
+          password,
+          strength: password.length > 12 ? 'Strong' : password.length > 8 ? 'Medium' : 'Weak',
+          lastModified: 'Just now'
+        };
+        passwords.push(newPassword);
+        renderPasswords();
+        updateStats();
+      }
+    }
+
+    // Search functionality
+    document.querySelector('.search-field input').addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      const rows = document.querySelectorAll('.password-table tbody tr');
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+      });
+    });
+
+    // Add event listeners to main buttons
+    document.querySelectorAll('.btn')[0].onclick = addPassword;
+    document.querySelectorAll('.btn')[1].onclick = () => alert('Syncing with Java Backend...\nThis would connect to your Java password vault application.');
+    document.querySelectorAll('.btn')[2].onclick = () => alert('Exporting vault...\nThis would save passwords to export_passwords.txt file.');
+
+    // Initialize on page load
+    updateStats();
+    renderPasswords();
+  </script>
 </html>
